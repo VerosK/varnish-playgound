@@ -1,0 +1,35 @@
+
+version: "2.4"
+
+services:
+    working:
+        image: working_server
+        entrypoint: /bin/working-server
+        expose: 
+           - "8983"
+        ports:
+           - "127.0.0.1:8984:8983"
+    broken:
+       image: working_server
+       entrypoint: /bin/broken-server
+       expose: 
+          - "8983"
+       ports:
+           - "127.0.0.1:8985:8983"
+    varnish:
+       image: varnish:6.0
+       volumes:
+          - ./default.vcl:/etc/varnish/default.vcl:ro
+       tmpfs:
+          - /usr/local/var/varnish:exec
+       command: 
+         - "-F"
+         - "-f"
+         - "/etc/varnish/default.vcl"
+         - "-a"
+         - ":8983"
+         - "-p"
+         - "max_restarts=3"
+       ports: 
+          - "127.0.0.1:8983:8983"
+
